@@ -29,45 +29,54 @@ async function htmlBundler() {
 htmlBundler();
 
 // копируем папку assets и ее содержимое в папку project-dist/assets
-fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), {recursive: true}, err => {
-	if (err) {
-		console.error(err);
-		return;
-	}
-});
+function copyAssets() {
 
-fs.readdir('./06-build-page/assets/', (err, files) => {
-	if (err) {
-		console.error(err);
-		return;
-	}
-	files.forEach(el => {
-		fs.mkdir(path.join(__dirname, 'project-dist/assets', el), {recursive: true}, err => {
-			if (err) {
-				console.error(err);
-				return;
-			}
-		});
-		let sourcePath = path.resolve('06-build-page/assets', el); // путь исходных папок
-		let sourceCopy = path.resolve('06-build-page/project-dist/assets', el); // путь папок которые скопируются в assets
-		fs.readdir(sourcePath, (err, files) => {
-			if (err) {
-				console.error(err);
-				return;
-			}
-			for (const file of files) {
-				let filePath = path.join(sourcePath, file); // пусть исходных файлов
-				let fileCopy = path.join(sourceCopy, file); // путь файлов которые скопируются
-				fs.copyFile(filePath, fileCopy, err => {
-					if (err) {
-						console.error(err);
-						return;
-					}
-				});
-			}
+	fs.mkdir(path.join(__dirname, 'project-dist', 'assets'), {recursive: true}, err => {
+		if (err) {
+			console.error(err);
+			return;
+		}
+	});
+
+	fs.readdir('./06-build-page/assets/', (err, files) => {
+		if (err) {
+			console.error(err);
+			return;
+		}
+		files.forEach(el => {
+			fs.mkdir(path.join(__dirname, 'project-dist/assets', el), {recursive: true}, err => {
+				if (err) {
+					console.error(err);
+					return;
+				}
+			});
+			let sourcePath = path.resolve('06-build-page/assets', el); // путь исходных папок assets
+			let sourceCopy = path.resolve('06-build-page/project-dist/assets', el); // путь папок которые скопируются в project-dist/assets
+			fs.readdir(sourcePath, (err, files) => {
+				if (err) {
+					console.error(err);
+					return;
+				}
+				for (const file of files) {
+					let filePath = path.join(sourcePath, file); // пусть исходных файлов
+					let fileCopy = path.join(sourceCopy, file); // путь файлов которые скопируются
+					fs.copyFile(filePath, fileCopy, err => {
+						if (err) {
+							console.error(err);
+							return;
+						}
+					});
+				}
+			});
 		});
 	});
-});
+}
+fs.promises.rm(path.join(__dirname, 'project-dist', 'assets'), { recursive: true, force: true }, err => {
+	if (err) {
+		console.error(err);
+		return;
+	}
+}).then(copyAssets);
 
 // создание единого style.css в project-dist
 const bundleWriteStream = fs.createWriteStream(path.join(__dirname, 'project-dist', 'style.css'));
